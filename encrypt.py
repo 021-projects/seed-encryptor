@@ -21,13 +21,20 @@ def encrypt_seed(seed_phrase: str, password: str) -> bytes:
 
 
 if __name__ == "__main__":
-    # No command-line arguments for seed or password
     parser = argparse.ArgumentParser(description="Encrypt a seed phrase securely.")
     args = parser.parse_args()
 
-    # Prompting securely for seed phrase and password
+    # Prompting securely for seed phrase and password with confirmation
     seed_phrase = getpass("Please enter your seed phrase securely: ")
-    password = getpass("Please enter your password for encryption securely: ")
+
+    while True:
+        password = getpass("Please enter your password for encryption securely: ")
+        confirm_password = getpass("Please confirm your password: ")
+
+        if password == confirm_password:
+            break
+        else:
+            print("Passwords do not match. Please try again.")
 
     encrypted_data = encrypt_seed(seed_phrase, password)
     print(f"Encrypted Seed (hex): {encrypted_data.hex()}")

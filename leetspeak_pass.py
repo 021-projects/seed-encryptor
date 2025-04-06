@@ -58,7 +58,7 @@ def generate_password(words, special_characters, min_length=12):
     return password
 
 
-def prompt_and_confirm_words():
+def prompt_words(confirm=True):
     while True:
         print("\nEnter your secret words one by one (input hidden). Press Enter on an empty line to finish.")
         words = []
@@ -72,11 +72,14 @@ def prompt_and_confirm_words():
             print("No words entered. Try again.")
             continue
 
+        if not confirm:
+            return words
+
         print("\nPlease re-enter the words to confirm:")
         confirm_words = []
         for i in range(len(words)):
-            confirm = getpass.getpass(prompt=f"Word {i + 1}: ")
-            confirm_words.append(confirm)
+            confirm_input = getpass.getpass(prompt=f"Word {i + 1}: ")
+            confirm_words.append(confirm_input)
 
         if words == confirm_words:
             print("Words confirmed.")
@@ -89,9 +92,10 @@ def main():
     parser = argparse.ArgumentParser(description="Generate a strong password based on words and Leetspeak.")
     parser.add_argument('--specials', default='!@#$%^&*-_', help="Special characters to use for separating words")
     parser.add_argument('--min-length', type=int, default=12, help="Minimum password length")
+    parser.add_argument('--no-confirm', action='store_true', help="Skip confirmation step for words")
     args = parser.parse_args()
 
-    words = prompt_and_confirm_words()
+    words = prompt_words(confirm=not args.no_confirm)
     special_characters = list(args.specials)
     password = generate_password(words, special_characters, args.min_length)
     print(f"\nGenerated password: {password}")

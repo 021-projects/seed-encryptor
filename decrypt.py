@@ -1,6 +1,8 @@
 import hashlib
+import argparse
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from getpass import getpass
+import os
 
 
 def derive_key(password: str, salt: bytes) -> bytes:
@@ -16,12 +18,32 @@ def decrypt_seed(encrypted_data: bytes, password: str) -> str:
     return aesgcm.decrypt(nonce, ciphertext, None).decode()
 
 
-if __name__ == "__main__":
-    # We will no longer ask for the encrypted_hex or password via command-line arguments
-    # Instead, we will ask securely for both using getpass
-    encrypted_hex = getpass("Please enter the encrypted seed phrase (hex): ")
-    password = getpass("Please enter your password for decryption securely: ")
+def read_password_from_file(path: str) -> str:
+    """Read and return the first line from a password file."""
+    with open(path, 'r', encoding='utf-8') as file:
+        return file.readline().strip()
 
-    encrypted_bytes = bytes.fromhex(encrypted_hex)
-    decrypted_seed = decrypt_seed(encrypted_bytes, password)
-    print(f"Decrypted Seed: {decrypted_seed}")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Decrypt an AES-256-GCM encrypted seed phrase.")
+    parser.add_argument("--password-file", help="Path to file containing the password")
+    args = parser.parse_args()
+
+    # Ask for encrypted seed (hex)
+    encrypted_hex = getpass("Enter the encrypted seed phrase (hex): ")
+
+    # Get password either from file or prompt
+    if args.password_file:
+        if not os.path.isfile(args.password_file):
+            print(f"❌ Error: Password file '{args.password_file}' not found.")
+            exit(1)
+        password = read_password_from_file(args.password_file)
+    else:
+        password = getpass("Enter your password securely: ")
+
+    try:
+        encrypted_bytes = bytes.fromhex(encrypted_hex)
+        decrypted_seed = decrypt_seed(encrypted_bytes, password)
+        print(f"✅ Decrypted Seed: {decrypted_seed}")
+    except Exception as e:
+        print(f"❌ Decryption failed: {str(e)}")

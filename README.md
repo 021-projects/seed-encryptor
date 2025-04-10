@@ -22,5 +22,5 @@ python decrypt.py
 
 ## Generate LeetSpeak Password From Words
 ```bash
-python leetspeak_pass.py firstword secondword thirdword
+python leetspeak_pass.py
 ```

@@ -88,14 +88,25 @@ def prompt_words(confirm=True):
             print("Words do not match. Let's try again.")
 
 
+def read_words_from_file(file_path):
+    try:
+        with open(file_path) as file:
+            words = [line.strip() for line in file if line.strip()]
+        return words
+    except FileNotFoundError:
+        print(f"File '{file_path}' not found. Please check the path and try again.")
+        return []
+
+
 def main():
     parser = argparse.ArgumentParser(description="Generate a strong password based on words and Leetspeak.")
     parser.add_argument('--specials', default='!@#$%^&*-_', help="Special characters to use for separating words")
     parser.add_argument('--min-length', type=int, default=12, help="Minimum password length")
     parser.add_argument('--no-confirm', action='store_true', help="Skip confirmation step for words")
+    parser.add_argument('--file', type=str, help="File to read words from (one word per line)")
     args = parser.parse_args()
 
-    words = prompt_words(confirm=not args.no_confirm)
+    words = read_words_from_file(args.file) if args.file else prompt_words(confirm=not args.no_confirm)
     special_characters = list(args.specials)
     password = generate_password(words, special_characters, args.min_length)
     print(f"\nGenerated password: {password}")
